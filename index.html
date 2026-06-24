@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dharun | Video Editor & Visual Storyteller</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Product Sans CDN & Google Fonts -->
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/product-sans');
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    </style>
+
+    <style>
+        :root {
+            --bg-color: #0c0f1d;
+            --accent-blue: #084bf0; /* Bright Electric Blue */
+            --accent-yellow: #ffd200; /* Golden Yellow */
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.07);
+            
+            --font-sans: 'Product Sans', 'Inter', sans-serif;
+            --font-serif: 'Instrument Serif', serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            /* Default OS cursor is visible alongside the custom follower */
+            cursor: default; 
+        }
+
+        /* Custom fonts helper */
+        .font-product { font-family: var(--font-sans); }
+        .font-editorial { font-family: var(--font-serif); }
+        .font-code { font-family: var(--font-mono); }
+
+        /* --- BRIGHT ELECTRIC BLUE HERO BACKGROUND --- */
+        .hero-section {
+            background: radial-gradient(circle at 50% 50%, #1255fc 0%, #083bd1 60%, #032185 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 950px;
+            height: 950px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- FILM GRAIN OVERLAY --- */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            opacity: 0.035;
+            pointer-events: none;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+        }
+
+        /* --- MOUSE TRACKER (DIFF BLEND OVERLAY) --- */
+        .mouse-follower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 22px;
+            height: 22px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1), height 0.3s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s, border 0.3s, box-shadow 0.3s;
+            will-change: transform;
+        }
+
+        /* Class added via JS on hover of interactive items */
+        .mouse-hovering {
+            width: 48px;
+            height: 48px;
+            background-color: transparent !important;
+            border: 2.5px solid var(--accent-yellow) !important;
+            box-shadow: 0 0 25px rgba(255, 210, 0, 0.85), 0 0 10px rgba(255, 210, 0, 0.45);
+            mix-blend-mode: normal !important;
+        }
+
+        /* --- GLASSMORPHISM SYSTEM --- */
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(8, 75, 240, 0.05);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .liquid-glass:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 40px 0 rgba(8, 75, 240, 0.15), 0 0 40px 0 rgba(8, 75, 240, 0.15);
+        }
+
+        .services-card {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .services-card:hover {
+            transform: scale(1.04) translateY(-6px);
+            z-index: 20;
+            box-shadow: 0 25px 50px rgba(8, 75, 240, 0.12) !important;
+        }
+
+        /* --- INTERLOCKING HERO TYPOGRAPHY & PORTRAIT --- */
+        .hero-text-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Increased Font Size & Strict Sizing */
+        .huge-title {
+            font-size: 15.5vw;
+            line-height: 0.8;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .huge-title {
+                font-size: 18vw;
+            }
+        }
+
+        .portrait-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30vw;
+            max-width: 460px;
+            min-width: 260px;
+            height: auto;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .portrait-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            mix-blend-mode: normal; 
+            filter: contrast(1.05) brightness(1.02);
+            /* Smooth bottom fade starting much lower (90%) */
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%);
+        }
+
+        /* --- BLUEPRINT GRID PAPER TEXTURES --- */
+        /* White Section Grid */
+        .blueprint-grid-section {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(to right, rgba(8, 75, 240, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(8, 75, 240, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #00227a; /* Deep Navy Blue */
+        }
+
+        /* Blue Section Grid (For Last Section / Contact) */
+        .blue-blueprint-grid-section {
+            background-color: var(--accent-blue);
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #ffffff;
+        }
+
+        .blueprint-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #084bf0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* --- SCROLL REVEAL SYSTEM (Start hidden, animate on scroll) --- */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-element.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- HORIZONTAL STICKY SCROLL PREVIOUS WORKS --- */
+        .sticky-scroll-container {
+            position: relative;
+            height: 350vh; /* Control vertical scroll length */
+        }
+
+        .sticky-scroll-view {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .scroll-track-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .horizontal-scroll-track {
+            display: flex;
+            gap: 2.5rem;
+            width: max-content;
+            will-change: transform;
+            padding: 4rem 0; /* Add vertical space for pop vertical scale shift */
+        }
+
+        .horizontal-scroll-track > div, .horizontal-scroll-track > a {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .horizontal-scroll-track > div:hover, .horizontal-scroll-track > a:hover {
+            transform: scale(1.1) translateY(-10px) !important;
+            z-index: 20;
+            box-shadow: 0 25px 60px rgba(8, 75, 240, 0.35);
+        }
+
+        /* --- KINETIC TYPOGRAPHY STYLING & TRANSITIONS --- */
+        .kinetic-char {
+            display: inline-block;
+            transition: font-weight 0.4s ease, font-family 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.4s ease;
+            transform-origin: center bottom;
+        }
+
+        .char-state-default {
+            font-style: normal;
+        }
+
+        .char-state-serif {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .char-state-mono {
+            font-family: var(--font-mono);
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        /* Specific text outline rules to prevent disappearing */
+        #word-video .char-state-outline {
+            -webkit-text-stroke: 2.5px #ffffff;
+            color: transparent;
+        }
+
+        #word-editor .char-state-outline {
+            -webkit-text-stroke: 2.5px var(--accent-yellow);
+            color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c0f1d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* --- SCROLL-RESPONSIVE FLOATING NAVBAR --- */
+        #nav-pill {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .scrolled-nav {
+            background: rgba(8, 75, 240, 0.85) !important; /* Brand Electric Blue */
+            backdrop-filter: blur(24px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.4), 0 0 25px 0 rgba(8, 75, 240, 0.25) !important;
+            max-width: 960px !important;
+            padding-top: 0.65rem !important;
+            padding-bottom: 0.65rem !important;
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+            margin-top: 0.5rem;
+        }
+
+        /* --- BUTTON GLOW HALO EFFECT --- */
+        .btn-halo {
+            position: relative;
+            overflow: visible; /* Prevent clipping of glow */
+            isolation: isolate;
+        }
+
+        .btn-halo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .btn-halo-yellow::before {
+            background: var(--accent-yellow);
+        }
+
+        .btn-halo-yellow:hover::before {
+            animation: halo-yellow-pulse 1.6s infinite cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes halo-yellow-pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.85;
+                filter: blur(2px);
+                box-shadow: 0 0 0 0px rgba(255, 210, 0, 0.7);
+            }
+            100% {
+                transform: scale(1.18);
+                opacity: 0;
+                filter: blur(10px);
+                box-shadow: 0 0 0 25px rgba(255, 210, 0, 0);
+            }
+        }
+
+        .btn-halo-blue::before {
+            background: var(--accent-blue);
+        }
+
+        .btn-halo-blue:hover::before {
+            animation: halo-blue-pulse 1.6s infinite cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes halo-blue-pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+                filter: blur(2px);
+                box-shadow: 0 0 0 0px rgba(8, 75, 240, 0.7);
+            }
+            100% {
+                transform: scale(1.18);
+                opacity: 0;
+                filter: blur(10px);
+                box-shadow: 0 0 0 25px rgba(8, 75, 240, 0);
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-blue-600 selection:text-white">
+
+    <!-- Custom Cursor Follower -->
+    <div id="mouse-follower" class="mouse-follower"></div>
+    <div class="noise"></div>
+
+    <!-- Fixed Header -->
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 py-6 px-6 md:px-12 flex justify-center transition-all duration-500 pointer-events-none">
+        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-4 px-6 md:px-8 transition-all duration-500 rounded-full pointer-events-auto">
+            <a href="#" class="text-xl font-bold tracking-tight uppercase flex items-center gap-2 font-product interactive-target text-white">
+                <div class="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-[0_0_15px_#ffd200]"></div>
+                Dharun
+            </a>
+            <div class="hidden md:flex gap-10 text-[10px] font-bold tracking-[0.25em] uppercase text-white/80 font-code justify-center">
+                <a href="#about-philosophy" class="nav-link hover:text-yellow-400 transition-colors duration-300 interactive-target">Philosophy</a>
+                <a href="#work-container" class="nav-link hover:text-yellow-400 transition-colors duration-300 interactive-target">Previous Projects</a>
+                <a href="#services" class="nav-link hover:text-yellow-400 transition-colors duration-300 interactive-target">Services</a>
+            </div>
+            <a href="#contact" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold uppercase text-[10px] tracking-widest px-6 py-2.5 rounded-full shadow-lg shadow-yellow-500/20 transition-all duration-300 font-product interactive-target btn-halo btn-halo-yellow">
+                Hire Me →
+            </a>
+        </nav>
+    </header>
+
+    <!-- Hero Section (Electric Blue, ISOM Layout) -->
+    <section class="min-h-screen flex flex-col justify-between hero-section px-6 md:px-12 pt-6 pb-12">
+        <div class="hero-glow"></div>
+        
+        <!-- Spacer to preserve flex layout height -->
+        <div class="w-full py-4 h-[76px] invisible pointer-events-none"></div>
+
+        <!-- Main Title / Portrait Interlocking Grid Area -->
+        <div class="relative flex flex-col items-center justify-center text-center my-auto py-12">
+            <!-- Open For Freelance Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#001da6]/50 border border-white/10 text-yellow-400 text-[10px] font-bold font-code mb-8 relative z-10">
+                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                Open for Freelance
+            </div>
+
+            <!-- Pre-title -->
+            <span class="text-white text-base md:text-xl font-product tracking-wider mb-2 relative z-10 opacity-90">
+                Not just a
+            </span>
+
+            <!-- Layered Layout Container -->
+            <div class="relative w-full max-w-7xl select-none">
+                <!-- Large text layer -->
+                <div class="huge-title font-product flex flex-col items-center w-full relative z-2">
+                    <div id="word-video" class="text-white relative z-2 tracking-tighter">VIDEO</div>
+                    <div id="word-editor" class="text-yellow-400 relative z-4 tracking-tighter mt-[-1vw]">EDITOR</div>
+                </div>
+
+                <!-- Grayscale portrait layer placed absolute in the gap center -->
+                <div class="portrait-container">
+                    <img src="Editor.png" alt="Dharun Editor Portrait" class="portrait-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Informational Bar (Symmetrical Metrics) -->
+        <div class="relative z-10 w-full max-w-7xl mx-auto flex justify-between items-end border-t border-white/15 pt-8 font-product">
+            <!-- Left: Projects worked -->
+            <div class="text-left">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-white/50 font-code block mb-1">Projects worked</span>
+                <span class="text-4xl md:text-5xl font-extrabold text-yellow-400 leading-none">30+</span>
+            </div>
+
+            <!-- Right: Total Impressions -->
+            <div class="text-right">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-white/50 font-code block mb-1">Total Impressions</span>
+                <span class="text-4xl md:text-5xl font-extrabold text-yellow-400 leading-none">5M+</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Blueprint Grid Paper Section (Centered Philosophy, Video removed) -->
+    <section id="about-philosophy" class="blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden text-center">
+        <!-- Floating blue coordinate dots representing graph elements -->
+        <div class="blueprint-dot hidden md:block" style="top: 20%; left: 30%;"></div>
+        <div class="blueprint-dot hidden md:block" style="top: 70%; left: 15%;"></div>
+        <div class="blueprint-dot hidden md:block" style="top: 80%; left: 80%;"></div>
+        
+        <div class="max-w-3xl mx-auto flex flex-col items-center justify-center space-y-8 reveal-element">
+            <!-- Program Pill Badge -->
+            <div>
+                <span class="inline-block px-5 py-1.5 rounded-full border border-blue-600/30 text-blue-600 text-[10px] font-bold uppercase tracking-[0.25em] bg-blue-50/50 font-code">
+                    Philosophy
+                </span>
+            </div>
+            
+            <h2 class="text-5xl md:text-6xl font-extrabold tracking-tight font-product leading-none">
+                <span class="text-[#084bf0]">What is</span><br>
+                <span class="text-yellow-500">Video Editing?</span>
+            </h2>
+            
+            <div class="space-y-6 text-[#00227a]/90 font-light text-base md:text-lg leading-relaxed font-product">
+                <p class="font-bold text-[#084bf0]">
+                    Most editors simply cut footage together on a timeline. Storytelling is about pacing, soundscapes, and visual progression.
+                </p>
+                <p>
+                    There's a massive difference between an editor who knows how to operate visual software and a storyteller who moves audiences. That difference isn't the program—it's taste. Knowing why a cut feels right, not just which shortcuts to press.
+                </p>
+                <p>
+                    Whether editing high-retention commercial ads, short documentaries, or visual narratives, I design with rhythm, pacing, and hooks to ensure your message drives impact.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Automatic Scroll Gallery (Previous Projects) -->
+    <section id="work-container" class="blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden border-t border-blue-600/10">
+        <!-- Floating blue coordinate dots representing graph elements -->
+        <div class="blueprint-dot hidden md:block" style="top: 15%; left: 80%;"></div>
+        <div class="blueprint-dot hidden md:block" style="top: 75%; left: 10%;"></div>
+
+        <!-- Header for Carousel Section -->
+        <div class="max-w-7xl mx-auto w-full px-6 md:px-12 flex justify-between items-end mb-12 select-none">
+            <div>
+                <span class="text-blue-600 font-code text-[10px] uppercase tracking-widest block mb-2 font-bold">Showcase <span class="text-yellow-500">Gallery</span></span>
+                <h2 class="text-4xl md:text-5xl font-bold tracking-tight font-product text-[#084bf0]">Previous <span class="text-yellow-500">Projects</span></h2>
+            </div>
+            <p class="text-[#084bf0]/80 font-light max-w-xs font-product text-xs hidden md:block">
+                Explore visual pacing, pacing rhythms, and sound synthesis in automatic slide view.
+            </p>
+        </div>
+
+        <!-- Horizontal Carousel track -->
+        <div class="scroll-track-wrapper">
+            <div id="work-track" class="horizontal-scroll-track">
+                <!-- Project 1: VIT Chennai Fest Live Campaign -->
+                <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
+                    <video src="AA23-VB26-LIVE NOW.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <!-- Default overlay -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Fest Edit • Live Campaign</span>
+                        <h3 class="text-lg font-bold font-product text-white">VIT Chennai Fest - Live Campaign</h3>
+                    </div>
+                    <!-- Hover special popup styled info overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 h-auto bg-gradient-to-t from-black/95 via-black/90 to-transparent backdrop-blur-[4px] border-t border-yellow-400/30 pt-3 pb-4 px-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">Masterpiece • Cinematic Edit</span>
+                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">VIT Chennai Fest - Live Campaign</h4>
+                        <p class="text-white/90 font-product text-[9px] leading-relaxed font-light">
+                            The ultimate VIT Chennai Cultural Fest live indication edit. Features epic movie-style cinematic motion graphics, high-impact pacing, and legendary transitions.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Project 2: VIT Chennai Fest Official Teaser -->
+                <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
+                    <video src="PF2.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <!-- Default overlay -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Promo Teaser • Motion Graphics</span>
+                        <h3 class="text-lg font-bold font-product text-white">VIT Chennai Fest - Official Teaser</h3>
+                    </div>
+                    <!-- Hover special popup styled info overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 h-auto bg-gradient-to-t from-black/95 via-black/90 to-transparent backdrop-blur-[4px] border-t border-yellow-400/30 pt-3 pb-4 px-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">Promo Teaser • Cinematic Edit</span>
+                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">VIT Chennai Fest - Official Teaser</h4>
+                        <p class="text-white/90 font-product text-[9px] leading-relaxed font-light">
+                            A high-octane cinematic teaser for the VIT Chennai Cultural Fest. Integrates movie-style pacing, custom speed ramps, and explosive motion graphics to drive peak hype.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Project 3: Director PS Mithran Tribute -->
+                <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
+                    <video src="Raga of Revenge - DjBaap_6.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <!-- Default overlay -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Director Tribute • Globus Event</span>
+                        <h3 class="text-lg font-bold font-product text-white">Director PS Mithran Tribute - Globus VIT</h3>
+                    </div>
+                    <!-- Hover special popup styled info overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 h-auto bg-gradient-to-t from-black/95 via-black/90 to-transparent backdrop-blur-[4px] border-t border-yellow-400/30 pt-3 pb-4 px-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">Director Tribute • Globus Event</span>
+                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">Director PS Mithran Tribute - Globus VIT</h4>
+                        <p class="text-white/90 font-product text-[9px] leading-relaxed font-light">
+                            An event edit for VIT Chennai's Globus event, dedicated to famous director PS Mithran. Features high-retention storytelling, moody pacing, and deep cinematic tones.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Project 4: Dhurandhar Cinematic Showcase -->
+                <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
+                    <video src="Dhurandhar Final(Hope so).mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <!-- Default overlay -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Rhythmic Flow • Timeline Sync</span>
+                        <h3 class="text-lg font-bold font-product text-white">Dhurandhar Cinematic Showcase</h3>
+                    </div>
+                    <!-- Hover special popup styled info overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 h-auto bg-gradient-to-t from-black/95 via-black/90 to-transparent backdrop-blur-[4px] border-t border-yellow-400/30 pt-3 pb-4 px-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">Peak Pacing • Masterwork</span>
+                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">Dhurandhar Cinematic Showcase</h4>
+                        <p class="text-white/90 font-product text-[9px] leading-relaxed font-light">
+                            A legendary edit showing absolute auditory-visual sync, flawless flow, and top-tier pacing. Built with custom sound synthesis to keep viewers fully engaged.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Project 5: Spider-Man VFX Tribute Film -->
+                <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
+                    <video src="Final.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <!-- Default overlay -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Visual Poetry • VFX Tribute</span>
+                        <h3 class="text-lg font-bold font-product text-white">Spider-Man VFX Tribute Film</h3>
+                    </div>
+                    <!-- Hover special popup styled info overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 h-auto bg-gradient-to-t from-black/95 via-black/90 to-transparent backdrop-blur-[4px] border-t border-yellow-400/30 pt-3 pb-4 px-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 pointer-events-none">
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">VFX Compositing • Cinematic</span>
+                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">Spider-Man VFX Tribute Film</h4>
+                        <p class="text-white/90 font-product text-[9px] leading-relaxed font-light">
+                            An epic visual tribute to Spiderman. Packed with complex VFX compositing, dynamic kinetic typography, and brilliant color grading to capture the web-slinger's story.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Horizontal See More Navigation trigger card -->
+                <a href="works.html" class="w-[20vw] min-w-[180px] aspect-[16/9] rounded-2xl relative group liquid-glass flex flex-col items-center justify-center border border-blue-600/15 hover:border-yellow-400 hover:bg-[#084bf0]/10 transition-all duration-500 interactive-target text-center">
+                    <div class="w-12 h-12 rounded-full border border-blue-600/20 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#084bf0] group-hover:border-yellow-400 text-blue-600 group-hover:text-yellow-400 transition-all">
+                        <svg class="w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </div>
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-blue-600 group-hover:text-yellow-500 font-code">See More Works</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- See More Button Centered Anchor just below the track -->
+        <div class="flex justify-center mt-12">
+            <a href="works.html" class="liquid-glass border-blue-600/30 text-blue-600 hover:bg-[#084bf0] hover:text-yellow-400 hover:border-yellow-400 px-10 py-3.5 rounded-full font-bold uppercase text-[9px] tracking-[0.25em] transition-all interactive-target font-code btn-halo btn-halo-blue">
+                See More Previous Projects
+            </a>
+        </div>
+    </section>
+
+
+
+    <!-- Services & Philosophy Details Section -->
+    <section id="services" class="blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden border-t border-blue-600/10">
+        <div class="blueprint-dot hidden md:block" style="top: 30%; left: 5%;"></div>
+        <div class="blueprint-dot hidden md:block" style="top: 70%; left: 95%;"></div>
+
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+                <div class="lg:col-span-5 reveal-element">
+                    <span class="text-blue-600 font-code text-xs uppercase tracking-widest block mb-4">Philosophy & <span class="text-yellow-500">Services</span></span>
+                    <h2 class="text-4xl md:text-5xl font-bold font-product leading-tight mb-8 text-[#084bf0]">
+                        "Editing is where the story <span class="font-editorial italic font-normal text-yellow-500">truly breathes</span>."
+                    </h2>
+                    <p class="text-[#084bf0]/80 font-light leading-relaxed mb-8 font-product">
+                        Post-production isn't just about splicing cuts together; it's about managing tension, establishing visual cadence, and crafting moments that command attention. 
+                    </p>
+                    <div class="grid grid-cols-2 gap-8 font-product">
+                        <div>
+                            <div class="text-3xl font-extrabold mb-1 text-[#084bf0]">30+</div>
+                            <div class="text-[9px] font-bold uppercase tracking-[0.2em] text-[#084bf0]/60 font-code">Projects Done</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-extrabold mb-1 text-yellow-500">5M+</div>
+                            <div class="text-[9px] font-bold uppercase tracking-[0.2em] text-[#084bf0]/60 font-code">Impressions</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 reveal-element">
+                    <!-- Dynamic Pacing -->
+                    <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
+                        <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
+                            Dynamic Pacing
+                        </div>
+                        <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Structuring pacing custom-tailored to viewer retention, building hooks, and keeping audiences visually hooked throughout.</p>
+                    </div>
+                    
+                    <!-- Motion Graphics -->
+                    <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
+                        <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
+                            Motion Graphics
+                        </div>
+                        <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Crafting bespoke animations, kinetic typography, dynamic titles, and clean visual overlays that reinforce branding and highlight narrative beats.</p>
+                    </div>
+
+                    <!-- Sound Architecture -->
+                    <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
+                        <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
+                            Sound Architecture
+                        </div>
+                        <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Immersive soundscapes, dynamic sound effects, and volume mixing that elevate footage into an emotional journey.</p>
+                    </div>
+                    
+                    <!-- Cinematic Color -->
+                    <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
+                        <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
+                            Cinematic Color
+                        </div>
+                        <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Advanced color grading, mood setting, and visual consistency that reinforce the video's underlying theme.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Inquiry / Contact Section (Blue Grid Paper Theme, same texture) -->
+    <section id="contact" class="blue-blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden">
+        <!-- Floating coordinate dot -->
+        <div class="blueprint-dot hidden md:block !bg-yellow-400" style="top: 15%; left: 80%;"></div>
+        <div class="blueprint-dot hidden md:block !bg-yellow-400" style="top: 75%; left: 10%;"></div>
+
+        <div class="max-w-3xl mx-auto reveal-element">
+            <div class="text-center mb-16">
+                <span class="inline-block px-5 py-1.5 rounded-full border border-yellow-400/30 text-yellow-400 text-[10px] font-bold uppercase tracking-[0.25em] bg-yellow-400/5 font-code mb-4">
+                    Collaborate
+                </span>
+                <h2 class="text-5xl md:text-6xl font-extrabold font-product text-white leading-none mb-6">Start a <span class="text-yellow-400">Project</span></h2>
+                <p class="text-white/80 font-light font-product text-base md:text-lg max-w-lg mx-auto">
+                    Ready to transform your content? Reach out below for a free consultation session.
+                </p>
+            </div>
+
+            <!-- Form styled with high visual glassmorphism on blue background -->
+            <form id="contact-form" class="liquid-glass !bg-white/5 !border-white/15 p-8 md:p-12 rounded-3xl space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.2)]">
+                <!-- FormSubmit Configuration Settings -->
+                <input type="hidden" name="_subject" value="New Portfolio Inquiry!">
+                <input type="hidden" name="_template" value="table">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-2 font-code" for="name">Your Name</label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-2 font-code" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-2 font-code" for="message">Project Description</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Tell me about your brand, assets, and project goals..." class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required></textarea>
+                </div>
+
+                <!-- Golden Yellow CTA submit button -->
+                <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold uppercase text-xs tracking-widest py-4 rounded-full transition-colors duration-300 shadow-[0_4px_20px_rgba(255,210,0,0.35)] interactive-target btn-halo btn-halo-yellow">
+                    Send Inquiry
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Video Player Modal Template -->
+    <div id="video-modal" class="fixed inset-0 z-[999900] bg-black/90 backdrop-blur-lg flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500">
+        <!-- Close button at the top right -->
+        <button id="close-modal-btn" class="absolute top-6 right-6 text-white/70 hover:text-yellow-400 font-code text-xs tracking-widest uppercase flex items-center gap-2 transition-colors interactive-target">
+            Close ×
+        </button>
+        <!-- Modal Content Container -->
+        <div class="relative max-w-4xl w-[95%] max-h-[85vh] rounded-3xl overflow-hidden border border-white/15 bg-black shadow-[0_0_60px_rgba(8,75,240,0.3)] flex items-center justify-center transform scale-95 transition-all duration-500" id="modal-container">
+            <video id="modal-video" class="max-w-full max-h-[85vh] w-auto h-auto object-contain" controls autoplay playsinline></video>
+        </div>
+    </div>
+
+    <!-- Interactive Scripting -->
+    <script>
+        // --- HIGH INERTIA MOUSE TRACKER ---
+        const follower = document.getElementById('mouse-follower');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = window.innerWidth / 2;
+        let cursorY = window.innerHeight / 2;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Loop calculating the slow catch-up spring/lerp effect
+        function updateCursor() {
+            const ease = 0.05; 
+            cursorX += (mouseX - cursorX) * ease;
+            cursorY += (mouseY - cursorY) * ease;
+
+            follower.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
+            requestAnimationFrame(updateCursor);
+        }
+        updateCursor();
+
+        // Hover scale additions
+        const interactiveElements = document.querySelectorAll('.interactive-target');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                follower.classList.add('mouse-hovering');
+            });
+            el.addEventListener('mouseleave', () => {
+                follower.classList.remove('mouse-hovering');
+            });
+        });
+
+
+        // --- KINETIC TITLE CHARACTER INJECTION & MORPHING ---
+        function applyKineticTypography(wordElementId) {
+            const wordEl = document.getElementById(wordElementId);
+            const wordText = wordEl.textContent.trim();
+            wordEl.textContent = ''; // Clear original text
+
+            const chars = [];
+            [...wordText].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'kinetic-char char-state-default';
+                span.style.transitionDelay = `${index * 0.01}s`;
+                wordEl.appendChild(span);
+                chars.push(span);
+            });
+
+            const charStates = [
+                'char-state-default',
+                'char-state-serif',
+                'char-state-mono',
+                'char-state-outline'
+            ];
+
+            function morphCharacter(charSpan) {
+                charStates.forEach(cls => charSpan.classList.remove(cls));
+                const randomState = charStates[Math.floor(Math.random() * charStates.length)];
+                charSpan.classList.add(randomState);
+            }
+
+            // Hover triggers with smooth timeouts to prevent color vanishing bugs
+            chars.forEach(char => {
+                let hoverActive = false;
+                char.addEventListener('mouseenter', () => {
+                    hoverActive = true;
+                    morphCharacter(char);
+                    char.style.transform = 'scale(1.15) translateY(-5px)';
+                    // Highlight on hover
+                    if (wordElementId.includes('editor')) {
+                        char.style.color = '#ffffff'; // Editor letters highlight white on hover
+                    } else {
+                        char.style.color = '#ffd200'; // Video letters highlight gold on hover
+                    }
+                });
+                
+                char.addEventListener('mouseleave', () => {
+                    hoverActive = false;
+                    setTimeout(() => {
+                        if (!hoverActive) {
+                            char.style.transform = '';
+                            char.style.color = '';
+                        }
+                    }, 200);
+                });
+            });
+        }
+
+        applyKineticTypography('word-video');
+        applyKineticTypography('word-editor');
+
+
+        // --- SCROLL REVEAL (INTERSECTION OBSERVER) ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.12
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-element').forEach(el => {
+            observer.observe(el);
+        });
+
+
+        // Video play/pause on hover (and autoplay initially)
+        function bindVideoHover(card) {
+            const video = card.querySelector('video');
+            if (!video) return;
+
+            // Autoplay immediately on load
+            video.play().catch(err => console.log("Autoplay blocked or interrupted:", err));
+
+            card.addEventListener('mouseenter', () => {
+                video.play().catch(err => console.log("Video play interrupted:", err));
+            });
+
+            // If clicked, open full-screen video player with sound
+            card.addEventListener('click', () => {
+                openVideoModal(video.getAttribute('src'));
+            });
+        }
+
+        document.querySelectorAll('.video-card').forEach(bindVideoHover);
+
+        // --- VIDEO PLAYER MODAL CONTROLLER ---
+        const videoModal = document.getElementById('video-modal');
+        const modalVideo = document.getElementById('modal-video');
+        const modalContainer = document.getElementById('modal-container');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        // Dynamic aspect ratio sizing based on loaded video dimensions
+        modalVideo.addEventListener('loadedmetadata', () => {
+            const width = modalVideo.videoWidth;
+            const height = modalVideo.videoHeight;
+            if (!width || !height) return;
+            const aspectRatio = width / height;
+
+            if (aspectRatio < 1) {
+                // Portrait/vertical video: shrink max-width to hug the video portrait bounding box
+                modalContainer.style.maxWidth = `calc(85vh * ${aspectRatio})`;
+            } else {
+                // Landscape video: restore the default tailwind max-w-4xl
+                modalContainer.style.maxWidth = '';
+            }
+        });
+
+        function openVideoModal(videoSrc) {
+            modalVideo.src = videoSrc;
+            modalVideo.muted = false; // Play with audio
+            modalVideo.volume = 0.7;  // Set comfortable default volume
+            videoModal.classList.remove('opacity-0', 'pointer-events-none');
+            videoModal.classList.add('opacity-100', 'pointer-events-auto');
+            modalContainer.classList.remove('scale-95');
+            modalContainer.classList.add('scale-100');
+            modalVideo.play().catch(err => console.log("Modal video play blocked:", err));
+        }
+
+        function closeVideoModal() {
+            videoModal.classList.remove('opacity-100', 'pointer-events-auto');
+            videoModal.classList.add('opacity-0', 'pointer-events-none');
+            modalContainer.classList.remove('scale-100', 'scale-95'); // Reset scale classes
+            modalContainer.classList.add('scale-95');
+            modalContainer.style.maxWidth = ''; // Reset aspect ratio sizing style
+            modalVideo.pause();
+            modalVideo.src = ''; // Clear source to stop buffering
+        }
+
+        closeModalBtn.addEventListener('click', closeVideoModal);
+        videoModal.addEventListener('click', (e) => {
+            // Close modal if background is clicked
+            if (e.target === videoModal) {
+                closeVideoModal();
+            }
+        });
+
+        // Close on Escape key press
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+
+        // --- INFINITE AUTO-SCROLL CAROUSEL ---
+        const track = document.getElementById('work-track');
+        
+        // Clone cards for seamless looping
+        const originalCards = Array.from(track.children);
+        originalCards.forEach(card => {
+            const clone = card.cloneNode(true);
+            // Re-bind hover event listeners for follower size on cloned cards
+            clone.addEventListener('mouseenter', () => {
+                follower.classList.add('mouse-hovering');
+            });
+            clone.addEventListener('mouseleave', () => {
+                follower.classList.remove('mouse-hovering');
+            });
+            // Re-bind video play/pause on clone
+            bindVideoHover(clone);
+            track.appendChild(clone);
+        });
+
+        let scrollSpeed = 0.8; // Butter smooth slide speed
+        let scrollPos = 0;
+        let isPaused = false;
+
+        function autoScroll() {
+            if (!isPaused) {
+                scrollPos -= scrollSpeed;
+                const halfWidth = track.scrollWidth / 2;
+                if (Math.abs(scrollPos) >= halfWidth) {
+                    scrollPos = 0;
+                }
+                track.style.transform = `translateX(${scrollPos}px) translateZ(0)`;
+            }
+            requestAnimationFrame(autoScroll);
+        }
+
+        // Start animation
+        autoScroll();
+
+        // Pause carousel scroll on mouse hover
+        track.addEventListener('mouseenter', () => {
+            isPaused = true;
+        });
+        track.addEventListener('mouseleave', () => {
+            isPaused = false;
+        });
+
+        // --- SCROLL RESPONSIVE NAVBAR ---
+        const mainHeader = document.getElementById('main-header');
+        const navPill = document.getElementById('nav-pill');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = [
+            document.getElementById('about-philosophy'),
+            document.getElementById('work-container'),
+            document.getElementById('services')
+        ];
+
+        window.addEventListener('scroll', () => {
+            // Morph floating nav pill on scroll
+            if (window.scrollY > 50) {
+                mainHeader.classList.remove('py-6');
+                mainHeader.classList.add('py-3');
+                navPill.classList.add('scrolled-nav');
+            } else {
+                mainHeader.classList.remove('py-3');
+                mainHeader.classList.add('py-6');
+                navPill.classList.remove('scrolled-nav');
+            }
+
+            // Section active highlight logic
+            let currentId = '';
+            sections.forEach(section => {
+                if (!section) return;
+                const sectionTop = section.offsetTop;
+                if (window.scrollY >= sectionTop - window.innerHeight / 3) {
+                    currentId = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-yellow-400');
+                link.classList.add('text-white/80');
+                if (link.getAttribute('href') === `#${currentId}`) {
+                    link.classList.add('text-yellow-400');
+                    link.classList.remove('text-white/80');
+                }
+            });
+        });
+
+        // --- CONTACT FORM SUBMIT HANDLER (AJAX) ---
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            
+            contactForm.addEventListener('submit', (e) => {
+                // If browsing as a local HTML file, fall back to standard POST redirect submission
+                if (window.location.protocol === 'file:') {
+                    contactForm.action = 'https://formsubmit.co/spaceguydharun@gmail.com';
+                    contactForm.method = 'POST';
+                    return; // Let the form submit naturally via browser redirect
+                }
+                
+                e.preventDefault();
+                
+                // Disable button and change state
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerText;
+                submitBtn.innerText = 'Sending...';
+                
+                const formData = new FormData(contactForm);
+                
+                fetch('https://formsubmit.co/ajax/spaceguydharun@gmail.com', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success === true || data.success === "true") {
+                        // Display clean success state inside the form container
+                        contactForm.innerHTML = `
+                            <div class="text-center py-12 space-y-4 reveal-element active">
+                                <div class="w-16 h-16 bg-yellow-400/10 border border-yellow-400 rounded-full flex items-center justify-center mx-auto text-yellow-400 animate-bounce">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-2xl font-bold font-product text-white">Inquiry Sent!</h3>
+                                <p class="text-white/80 font-product text-sm leading-relaxed max-w-sm mx-auto">
+                                    Thank you! Dharun will get back to you shortly. Please check your email to activate submissions on first use.
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        alert(data.message || 'Something went wrong. Please try again.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    alert('Submission failed. Please check your internet connection or email activation.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
