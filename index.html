@@ -87,6 +87,12 @@
             will-change: transform;
         }
 
+        @media (hover: none), (pointer: coarse), (max-width: 768px) {
+            .mouse-follower {
+                display: none !important;
+            }
+        }
+
         /* Class added via JS on hover of interactive items */
         .mouse-hovering {
             width: 48px;
@@ -141,6 +147,10 @@
         @media (max-width: 768px) {
             .huge-title {
                 font-size: 18vw;
+            }
+            .portrait-container {
+                width: 35vw;
+                min-width: 140px;
             }
         }
 
@@ -393,8 +403,8 @@
     <div class="noise"></div>
 
     <!-- Fixed Header -->
-    <header id="main-header" class="fixed top-0 left-0 w-full z-50 py-6 px-6 md:px-12 flex justify-center transition-all duration-500 pointer-events-none">
-        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-4 px-6 md:px-8 transition-all duration-500 rounded-full pointer-events-auto">
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 py-4 px-4 md:py-6 md:px-12 flex justify-center transition-all duration-500 pointer-events-none">
+        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-3 px-4 md:py-4 md:px-8 transition-all duration-500 rounded-full pointer-events-auto">
             <a href="#" class="text-xl font-bold tracking-tight uppercase flex items-center gap-2 font-product interactive-target text-white">
                 <div class="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-[0_0_15px_#ffd200]"></div>
                 Dharun
@@ -411,7 +421,7 @@
     </header>
 
     <!-- Hero Section (Electric Blue, ISOM Layout) -->
-    <section class="min-h-screen flex flex-col justify-between hero-section px-6 md:px-12 pt-6 pb-12">
+    <section class="min-h-screen flex flex-col justify-between hero-section px-4 md:px-12 pt-4 pb-8 md:pt-6 md:pb-12">
         <div class="hero-glow"></div>
         
         <!-- Spacer to preserve flex layout height -->
@@ -446,7 +456,7 @@
         </div>
 
         <!-- Bottom Informational Bar (Symmetrical Metrics) -->
-        <div class="relative z-10 w-full max-w-7xl mx-auto flex justify-between items-end border-t border-white/15 pt-8 font-product">
+        <div class="relative z-10 w-full max-w-7xl mx-auto flex justify-between items-end border-t border-white/15 pt-6 md:pt-8 font-product">
             <!-- Left: Projects worked -->
             <div class="text-left">
                 <span class="text-[9px] font-bold uppercase tracking-widest text-white/50 font-code block mb-1">Projects worked</span>
@@ -462,7 +472,7 @@
     </section>
 
     <!-- Section 2: Blueprint Grid Paper Section (Centered Philosophy, Video removed) -->
-    <section id="about-philosophy" class="blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden text-center">
+    <section id="about-philosophy" class="blueprint-grid-section relative py-20 md:py-32 px-4 md:px-12 overflow-hidden text-center">
         <!-- Floating blue coordinate dots representing graph elements -->
         <div class="blueprint-dot hidden md:block" style="top: 20%; left: 30%;"></div>
         <div class="blueprint-dot hidden md:block" style="top: 70%; left: 15%;"></div>
@@ -496,7 +506,7 @@
     </section>
 
     <!-- Section 3: Automatic Scroll Gallery (Previous Projects) -->
-    <section id="work-container" class="blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden border-t border-blue-600/10">
+    <section id="work-container" class="blueprint-grid-section relative py-20 md:py-32 px-4 md:px-12 overflow-hidden border-t border-blue-600/10">
         <!-- Floating blue coordinate dots representing graph elements -->
         <div class="blueprint-dot hidden md:block" style="top: 15%; left: 80%;"></div>
         <div class="blueprint-dot hidden md:block" style="top: 75%; left: 10%;"></div>
@@ -628,7 +638,7 @@
 
 
     <!-- Services & Philosophy Details Section -->
-    <section id="services" class="blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden border-t border-blue-600/10">
+    <section id="services" class="blueprint-grid-section relative py-20 md:py-32 px-4 md:px-12 overflow-hidden border-t border-blue-600/10">
         <div class="blueprint-dot hidden md:block" style="top: 30%; left: 5%;"></div>
         <div class="blueprint-dot hidden md:block" style="top: 70%; left: 95%;"></div>
 
@@ -692,7 +702,7 @@
     </section>
 
     <!-- Section 5: Inquiry / Contact Section (Blue Grid Paper Theme, same texture) -->
-    <section id="contact" class="blue-blueprint-grid-section relative py-32 px-6 md:px-12 overflow-hidden">
+    <section id="contact" class="blue-blueprint-grid-section relative py-20 md:py-32 px-4 md:px-12 overflow-hidden">
         <!-- Floating coordinate dot -->
         <div class="blueprint-dot hidden md:block !bg-yellow-400" style="top: 15%; left: 80%;"></div>
         <div class="blueprint-dot hidden md:block !bg-yellow-400" style="top: 75%; left: 10%;"></div>
@@ -983,13 +993,19 @@
         // Start animation
         autoScroll();
 
-        // Pause carousel scroll on mouse hover
+        // Pause carousel scroll on mouse hover & touch
         track.addEventListener('mouseenter', () => {
             isPaused = true;
         });
         track.addEventListener('mouseleave', () => {
             isPaused = false;
         });
+        track.addEventListener('touchstart', () => {
+            isPaused = true;
+        }, { passive: true });
+        track.addEventListener('touchend', () => {
+            isPaused = false;
+        }, { passive: true });
 
         // --- SCROLL RESPONSIVE NAVBAR ---
         const mainHeader = document.getElementById('main-header');
