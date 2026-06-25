@@ -144,14 +144,22 @@
             text-transform: uppercase;
         }
 
+        .hero-pretitle {
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .huge-title {
-                font-size: 25vw;
+                font-size: 30vw;
             }
             .portrait-container {
-                width: 58vw;
-                min-width: 220px;
-                max-width: 340px;
+                width: 70vw;
+                min-width: 260px;
+                max-width: 380px;
+            }
+            .hero-pretitle {
+                margin-bottom: 25vw !important;
             }
         }
 
@@ -437,7 +445,7 @@
             </div>
 
             <!-- Pre-title -->
-            <span class="text-white text-base md:text-xl font-product tracking-wider mb-2 relative z-10 opacity-90">
+            <span class="hero-pretitle text-white text-base md:text-xl font-product tracking-wider relative z-10 opacity-90">
                 Not just a
             </span>
 
