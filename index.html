@@ -144,14 +144,22 @@
             text-transform: uppercase;
         }
 
+        .hero-pretitle {
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .huge-title {
-                font-size: 25vw;
+                font-size: 30vw;
             }
             .portrait-container {
-                width: 58vw;
-                min-width: 220px;
-                max-width: 340px;
+                width: 70vw;
+                min-width: 260px;
+                max-width: 380px;
+            }
+            .hero-pretitle {
+                margin-bottom: 25vw !important;
             }
         }
 
@@ -405,7 +413,7 @@
 
     <!-- Fixed Header -->
     <header id="main-header" class="fixed top-0 left-0 w-full z-50 py-4 px-4 md:py-6 md:px-12 flex justify-center transition-all duration-500 pointer-events-none">
-        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-3 px-4 md:py-4 md:px-8 transition-all duration-500 rounded-full pointer-events-auto">
+        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-3 px-4 md:py-4 md:px-8 transition-all duration-500 rounded-full pointer-events-auto border border-transparent">
             <a href="#" class="text-xl font-bold tracking-tight uppercase flex items-center gap-2 font-product interactive-target text-white">
                 <div class="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-[0_0_15px_#ffd200]"></div>
                 Dharun
@@ -437,7 +445,7 @@
             </div>
 
             <!-- Pre-title -->
-            <span class="text-white text-base md:text-xl font-product tracking-wider mb-2 relative z-10 opacity-90">
+            <span class="hero-pretitle text-white text-base md:text-xl font-product tracking-wider relative z-10 opacity-90">
                 Not just a
             </span>
 
