@@ -66,6 +66,12 @@
             will-change: transform;
         }
 
+        @media (hover: none), (pointer: coarse), (max-width: 768px) {
+            .mouse-follower {
+                display: none !important;
+            }
+        }
+
         .mouse-hovering {
             width: 48px;
             height: 48px;
@@ -247,8 +253,8 @@
     <div class="noise"></div>
 
     <!-- Fixed Header -->
-    <header id="main-header" class="fixed top-0 left-0 w-full z-50 py-6 px-6 md:px-12 flex justify-center transition-all duration-500 pointer-events-none">
-        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-4 px-6 md:px-8 transition-all duration-500 rounded-full pointer-events-auto">
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 py-4 px-4 md:py-6 md:px-12 flex justify-center transition-all duration-500 pointer-events-none">
+        <nav id="nav-pill" class="w-full max-w-7xl flex justify-between items-center py-3 px-4 md:py-4 md:px-8 transition-all duration-500 rounded-full pointer-events-auto">
             <a href="index.html" class="text-xl font-bold tracking-tight uppercase flex items-center gap-2 font-product interactive-target text-white">
                 <div class="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-[0_0_15px_#ffd200]"></div>
                 Dharun
@@ -265,7 +271,7 @@
     </header>
 
     <!-- Header Section (Deep Blue Grid Paper Theme) -->
-    <section class="blue-blueprint-grid-section relative pt-40 pb-24 px-6 md:px-12 overflow-hidden text-center">
+    <section class="blue-blueprint-grid-section relative pt-32 pb-16 md:pt-40 md:pb-24 px-4 md:px-12 overflow-hidden text-center">
         <!-- Floating yellow coordinate dots representing graph elements -->
         <div class="blueprint-dot hidden md:block !bg-yellow-400" style="top: 25%; left: 80%;"></div>
         <div class="blueprint-dot hidden md:block !bg-yellow-400" style="top: 75%; left: 15%;"></div>
@@ -288,7 +294,7 @@
     </section>
 
     <!-- Archive Grid Section (White Blueprint Grid Paper Theme) -->
-    <section class="blueprint-grid-section relative py-24 px-6 md:px-12 overflow-hidden border-t border-blue-600/10 min-h-screen">
+    <section class="blueprint-grid-section relative py-16 md:py-24 px-4 md:px-12 overflow-hidden border-t border-blue-600/10 min-h-screen">
         <!-- Floating blue coordinate dots representing graph elements -->
         <div class="blueprint-dot hidden md:block" style="top: 15%; left: 85%;"></div>
         <div class="blueprint-dot hidden md:block" style="top: 60%; left: 10%;"></div>
