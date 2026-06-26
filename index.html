@@ -166,7 +166,6 @@
             }
             .scroll-track-wrapper {
                 overflow-x: auto !important;
-                scroll-snap-type: x mandatory !important;
                 -webkit-overflow-scrolling: touch !important;
                 display: flex !important;
                 padding-bottom: 1.5rem !important;
@@ -183,7 +182,6 @@
                 width: max-content !important;
             }
             .horizontal-scroll-track > div, .horizontal-scroll-track > a {
-                scroll-snap-align: center !important;
                 flex-shrink: 0 !important;
             }
         }
@@ -273,7 +271,14 @@
         .scroll-track-wrapper {
             position: relative;
             width: 100%;
-            overflow: hidden;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ */
+            cursor: grab;
+            user-select: none; /* Prevent text highlight during dragging */
+        }
+        .scroll-track-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         .horizontal-scroll-track {
@@ -936,27 +941,7 @@
 
         document.querySelectorAll('.video-card').forEach(bindVideoHover);
 
-        // IntersectionObserver for playing/pausing videos on mobile as they enter/leave the viewport
-        if (isMobile) {
-            const mobileVideoObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const video = entry.target.querySelector('video');
-                    if (!video) return;
-                    if (entry.isIntersecting) {
-                        video.play().catch(err => console.log("Mobile video play blocked:", err));
-                    } else {
-                        video.pause();
-                    }
-                });
-            }, {
-                root: null, // Use the viewport
-                threshold: 0.6 // 60% visibility
-            });
-
-            document.querySelectorAll('#work-track .video-card').forEach(card => {
-                mobileVideoObserver.observe(card);
-            });
-        }
+        // (IntersectionObserver moved below cloning logic to cover cloned cards)
 
         // --- VIDEO PLAYER MODAL CONTROLLER ---
         const videoModal = document.getElementById('video-modal');
@@ -1016,62 +1001,138 @@
             }
         });
 
-        // --- INFINITE AUTO-SCROLL CAROUSEL ---
+        // --- INFINITE AUTO-SCROLL CAROUSEL (UNIFIED SCROLL & DRAG/SWIPE) ---
         const track = document.getElementById('work-track');
+        const wrapper = document.querySelector('.scroll-track-wrapper');
         
-        // Clone cards for seamless looping (desktop only)
-        if (!isMobile) {
-            const originalCards = Array.from(track.children);
-            originalCards.forEach(card => {
-                const clone = card.cloneNode(true);
-                // Re-bind hover event listeners for follower size on cloned cards
-                clone.addEventListener('mouseenter', () => {
-                    follower.classList.add('mouse-hovering');
+        // Clone cards for seamless looping (on both mobile and PC)
+        const originalCards = Array.from(track.children);
+        originalCards.forEach(card => {
+            const clone = card.cloneNode(true);
+            // Re-bind hover event listeners for follower size on cloned cards
+            clone.addEventListener('mouseenter', () => {
+                follower.classList.add('mouse-hovering');
+            });
+            clone.addEventListener('mouseleave', () => {
+                follower.classList.remove('mouse-hovering');
+            });
+            // Re-bind video play/pause on clone
+            bindVideoHover(clone);
+            track.appendChild(clone);
+        });
+
+        // IntersectionObserver for playing/pausing videos on mobile as they enter/leave the viewport (including clones)
+        if (isMobile) {
+            const mobileVideoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (!video) return;
+                    if (entry.isIntersecting) {
+                        video.play().catch(err => console.log("Mobile video play blocked:", err));
+                    } else {
+                        video.pause();
+                    }
                 });
-                clone.addEventListener('mouseleave', () => {
-                    follower.classList.remove('mouse-hovering');
-                });
-                // Re-bind video play/pause on clone
-                bindVideoHover(clone);
-                track.appendChild(clone);
+            }, {
+                root: null, // Use the viewport
+                threshold: 0.6 // 60% visibility
+            });
+
+            document.querySelectorAll('#work-track .video-card').forEach(card => {
+                mobileVideoObserver.observe(card);
             });
         }
 
         let scrollSpeed = 0.8; // Butter smooth slide speed
-        let scrollPos = 0;
         let isPaused = false;
+        let resumeTimeout = null;
 
+        // AutoScroll function using wrapper.scrollLeft
         function autoScroll() {
-            if (isMobile) return; // Exit early on mobile
             if (!isPaused) {
-                scrollPos -= scrollSpeed;
-                const halfWidth = track.scrollWidth / 2;
-                if (Math.abs(scrollPos) >= halfWidth) {
-                    scrollPos = 0;
-                }
-                track.style.transform = `translateX(${scrollPos}px) translateZ(0)`;
+                wrapper.scrollLeft += scrollSpeed;
             }
             requestAnimationFrame(autoScroll);
         }
 
-        // Start animation
+        // Seamless wrapping logic inside scroll event of the wrapper
+        wrapper.addEventListener('scroll', () => {
+            const loopPoint = track.scrollWidth / 2;
+            if (wrapper.scrollLeft >= loopPoint) {
+                wrapper.scrollLeft -= loopPoint;
+            } else if (wrapper.scrollLeft <= 0) {
+                wrapper.scrollLeft += loopPoint;
+            }
+        });
+
+        // Start autoScroll animation
         autoScroll();
 
-        // Pause carousel scroll on mouse hover & touch (desktop only)
-        if (!isMobile) {
-            track.addEventListener('mouseenter', () => {
-                isPaused = true;
-            });
-            track.addEventListener('mouseleave', () => {
+        // Pause autoscroll on mouse hover (desktop/laptop)
+        wrapper.addEventListener('mouseenter', () => {
+            if (!isMobile) isPaused = true;
+        });
+        wrapper.addEventListener('mouseleave', () => {
+            if (!isMobile) isPaused = false;
+        });
+
+        // Touch event handlers (mobile/touchscreens) to pause autoscroll during swiping and resume 1.5s after touch ends
+        wrapper.addEventListener('touchstart', () => {
+            isPaused = true;
+            if (resumeTimeout) clearTimeout(resumeTimeout);
+        }, { passive: true });
+
+        wrapper.addEventListener('touchend', () => {
+            resumeTimeout = setTimeout(() => {
                 isPaused = false;
-            });
-            track.addEventListener('touchstart', () => {
-                isPaused = true;
-            }, { passive: true });
-            track.addEventListener('touchend', () => {
+            }, 1500);
+        }, { passive: true });
+
+        // --- CLICK & DRAG TO SCROLL (PC/Laptop mouse drag support) ---
+        let isDown = false;
+        let startX;
+        let scrollLeftVal;
+
+        wrapper.addEventListener('mousedown', (e) => {
+            isDown = true;
+            isPaused = true;
+            wrapper.style.cursor = 'grabbing';
+            startX = e.pageX - wrapper.offsetLeft;
+            scrollLeftVal = wrapper.scrollLeft;
+            if (resumeTimeout) clearTimeout(resumeTimeout);
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            if (isDown) {
+                isDown = false;
+                wrapper.style.cursor = 'grab';
                 isPaused = false;
-            }, { passive: true });
-        }
+            }
+        });
+
+        wrapper.addEventListener('mouseup', () => {
+            if (isDown) {
+                isDown = false;
+                wrapper.style.cursor = 'grab';
+                // Delay resuming autoscroll slightly after dragging ends for premium feel
+                resumeTimeout = setTimeout(() => {
+                    isPaused = false;
+                }, 1000);
+            }
+        });
+
+        wrapper.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - wrapper.offsetLeft;
+            const walk = (x - startX) * 1.5; // Drag sensitivity
+            wrapper.scrollLeft = scrollLeftVal - walk;
+        });
+
+        // Prevent browser default image/video drag ghosting behavior
+        wrapper.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
 
         // --- SCROLL RESPONSIVE NAVBAR ---
         const mainHeader = document.getElementById('main-header');
