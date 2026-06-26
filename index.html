@@ -164,6 +164,26 @@
             #word-video, #word-editor {
                 white-space: nowrap !important;
             }
+            .scroll-track-wrapper {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                display: flex !important;
+                padding-bottom: 1.5rem !important;
+                margin-bottom: -1.5rem !important;
+            }
+            .scroll-track-wrapper::-webkit-scrollbar {
+                display: none !important;
+            }
+            .horizontal-scroll-track {
+                transform: none !important;
+                display: flex !important;
+                gap: 1.5rem !important;
+                padding: 1rem 1.5rem !important;
+                width: max-content !important;
+            }
+            .horizontal-scroll-track > div, .horizontal-scroll-track > a {
+                flex-shrink: 0 !important;
+            }
         }
 
         .portrait-container {
@@ -251,7 +271,14 @@
         .scroll-track-wrapper {
             position: relative;
             width: 100%;
-            overflow: hidden;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ */
+            cursor: grab;
+            user-select: none; /* Prevent text highlight during dragging */
+        }
+        .scroll-track-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         .horizontal-scroll-track {
@@ -539,7 +566,7 @@
             <div id="work-track" class="horizontal-scroll-track">
                 <!-- Project 1: VIT Chennai Fest Live Campaign -->
                 <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
-                    <video src="Aa23-Vb26-Live Now.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <video src="Aa23-Vb26-Live Now.mp4" preload="metadata" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
                     <!-- Default overlay -->
                     <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
                         <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Fest Edit • Live Campaign</span>
@@ -557,7 +584,7 @@
 
                 <!-- Project 2: VIT Chennai Fest Official Teaser -->
                 <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
-                    <video src="Pf2.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <video src="Pf2.mp4" preload="metadata" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
                     <!-- Default overlay -->
                     <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
                         <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Promo Teaser • Motion Graphics</span>
@@ -575,7 +602,7 @@
 
                 <!-- Project 3: Director PS Mithran Tribute -->
                 <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
-                    <video src="Raga Of Revenge - Djbaap 6.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <video src="Raga Of Revenge - Djbaap 6.mp4" preload="metadata" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
                     <!-- Default overlay -->
                     <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
                         <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Director Tribute • Globus Event</span>
@@ -593,7 +620,7 @@
 
                 <!-- Project 4: Dhurandhar Cinematic Showcase -->
                 <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
-                    <video src="Dhurandhar Final(Hope So)(2).mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <video src="Dhurandhar Final(Hope So)(2).mp4" preload="metadata" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
                     <!-- Default overlay -->
                     <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
                         <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Rhythmic Flow • Timeline Sync</span>
@@ -609,20 +636,20 @@
                     </div>
                 </div>
 
-                <!-- Project 5: Spider-Man VFX Tribute Film -->
+                <!-- Project 5: Spider-Man: Chronophotographic Synthesis -->
                 <div class="w-[32vw] min-w-[280px] max-w-[480px] aspect-[16/9] rounded-2xl overflow-hidden relative group liquid-glass border-0 interactive-target video-card">
-                    <video src="Final.mp4" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
+                    <video src="Final.mp4" preload="metadata" loop muted playsinline class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"></video>
                     <!-- Default overlay -->
                     <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/95 via-black/50 to-transparent group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
-                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Visual Poetry • VFX Tribute</span>
-                        <h3 class="text-lg font-bold font-product text-white">Spider-Man VFX Tribute Film</h3>
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-1 block font-bold">Visual Poetry • Narrative Synthesis</span>
+                        <h3 class="text-lg font-bold font-product text-white">Spider-Man: Chronophotographic Synthesis</h3>
                     </div>
                     <!-- Hover special popup styled info overlay -->
                     <div class="absolute bottom-0 left-0 right-0 h-auto bg-gradient-to-t from-black/95 via-black/90 to-transparent backdrop-blur-[4px] border-t border-yellow-400/30 pt-3 pb-4 px-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 pointer-events-none">
-                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">VFX Compositing • Cinematic</span>
-                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">Spider-Man VFX Tribute Film</h4>
+                        <span class="text-yellow-400 font-code text-[8px] uppercase tracking-[0.2em] mb-0.5 block font-bold">Cinematic Compilation • Audio-Visual Synergism</span>
+                        <h4 class="text-xs md:text-sm font-bold font-product text-white mb-0.5">Spider-Man: Chronophotographic Synthesis</h4>
                         <p class="text-white/90 font-product text-[9px] leading-relaxed font-light">
-                            An epic visual tribute to Spiderman. Packed with complex VFX compositing, dynamic kinetic typography, and brilliant color grading to capture the web-slinger's story.
+                            An epic visual tribute to Spider-Man. Packed with advanced chroma keying, dynamic kinetic typography, and brilliant color grading to capture the web-slinger's story.
                         </p>
                     </div>
                 </div>
@@ -680,7 +707,7 @@
                     <!-- Dynamic Pacing -->
                     <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
                         <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
-                            Dynamic Pacing
+                            <span class="text-[#084bf0]">Dynamic</span> Pacing
                         </div>
                         <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Structuring pacing custom-tailored to viewer retention, building hooks, and keeping audiences visually hooked throughout.</p>
                     </div>
@@ -688,7 +715,7 @@
                     <!-- Motion Graphics -->
                     <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
                         <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
-                            Motion Graphics
+                            <span class="text-[#084bf0]">Motion</span> Graphics
                         </div>
                         <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Crafting bespoke animations, kinetic typography, dynamic titles, and clean visual overlays that reinforce branding and highlight narrative beats.</p>
                     </div>
@@ -696,7 +723,7 @@
                     <!-- Sound Architecture -->
                     <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
                         <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
-                            Sound Architecture
+                            <span class="text-[#084bf0]">Sound</span> Architecture
                         </div>
                         <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Immersive soundscapes, dynamic sound effects, and volume mixing that elevate footage into an emotional journey.</p>
                     </div>
@@ -704,7 +731,7 @@
                     <!-- Cinematic Color -->
                     <div class="liquid-glass !bg-transparent !border-blue-600/35 hover:!border-yellow-400/60 p-8 rounded-3xl font-product shadow-[0_10px_30px_rgba(8,75,240,0.03)] services-card flex flex-col items-start min-h-[240px]">
                         <div class="inline-block px-6 py-2.5 rounded-full border-2 border-yellow-500/70 text-yellow-500 font-extrabold text-lg md:text-xl uppercase tracking-wider mb-6 bg-yellow-500/5 font-product interactive-target btn-halo btn-halo-yellow select-none">
-                            Cinematic Color
+                            <span class="text-[#084bf0]">Cinematic</span> Color
                         </div>
                         <p class="text-[#084bf0] text-sm font-normal leading-relaxed">Advanced color grading, mood setting, and visual consistency that reinforce the video's underlying theme.</p>
                     </div>
@@ -889,17 +916,22 @@
         });
 
 
-        // Video play/pause on hover (and autoplay initially)
+        // Mobile detection flag
+        const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        // Video play/pause on hover (and autoplay initially for desktop)
         function bindVideoHover(card) {
             const video = card.querySelector('video');
             if (!video) return;
 
-            // Autoplay immediately on load
-            video.play().catch(err => console.log("Autoplay blocked or interrupted:", err));
+            if (!isMobile) {
+                // Autoplay immediately on load for desktop/laptop
+                video.play().catch(err => console.log("Autoplay blocked or interrupted:", err));
 
-            card.addEventListener('mouseenter', () => {
-                video.play().catch(err => console.log("Video play interrupted:", err));
-            });
+                card.addEventListener('mouseenter', () => {
+                    video.play().catch(err => console.log("Video play interrupted:", err));
+                });
+            }
 
             // If clicked, open full-screen video player with sound
             card.addEventListener('click', () => {
@@ -908,6 +940,8 @@
         }
 
         document.querySelectorAll('.video-card').forEach(bindVideoHover);
+
+        // (IntersectionObserver moved below cloning logic to cover cloned cards)
 
         // --- VIDEO PLAYER MODAL CONTROLLER ---
         const videoModal = document.getElementById('video-modal');
@@ -967,10 +1001,11 @@
             }
         });
 
-        // --- INFINITE AUTO-SCROLL CAROUSEL ---
+        // --- INFINITE AUTO-SCROLL CAROUSEL (UNIFIED SCROLL & DRAG/SWIPE) ---
         const track = document.getElementById('work-track');
+        const wrapper = document.querySelector('.scroll-track-wrapper');
         
-        // Clone cards for seamless looping
+        // Clone cards for seamless looping (on both mobile and PC)
         const originalCards = Array.from(track.children);
         originalCards.forEach(card => {
             const clone = card.cloneNode(true);
@@ -986,38 +1021,118 @@
             track.appendChild(clone);
         });
 
-        let scrollSpeed = 0.8; // Butter smooth slide speed
-        let scrollPos = 0;
-        let isPaused = false;
+        // IntersectionObserver for playing/pausing videos on mobile as they enter/leave the viewport (including clones)
+        if (isMobile) {
+            const mobileVideoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (!video) return;
+                    if (entry.isIntersecting) {
+                        video.play().catch(err => console.log("Mobile video play blocked:", err));
+                    } else {
+                        video.pause();
+                    }
+                });
+            }, {
+                root: null, // Use the viewport
+                threshold: 0.6 // 60% visibility
+            });
 
+            document.querySelectorAll('#work-track .video-card').forEach(card => {
+                mobileVideoObserver.observe(card);
+            });
+        }
+
+        let scrollSpeed = 0.8; // Butter smooth slide speed
+        let isPaused = false;
+        let resumeTimeout = null;
+
+        // AutoScroll function using wrapper.scrollLeft
         function autoScroll() {
             if (!isPaused) {
-                scrollPos -= scrollSpeed;
-                const halfWidth = track.scrollWidth / 2;
-                if (Math.abs(scrollPos) >= halfWidth) {
-                    scrollPos = 0;
-                }
-                track.style.transform = `translateX(${scrollPos}px) translateZ(0)`;
+                wrapper.scrollLeft += scrollSpeed;
             }
             requestAnimationFrame(autoScroll);
         }
 
-        // Start animation
+        // Seamless wrapping logic inside scroll event of the wrapper
+        wrapper.addEventListener('scroll', () => {
+            const loopPoint = track.scrollWidth / 2;
+            if (wrapper.scrollLeft >= loopPoint) {
+                wrapper.scrollLeft -= loopPoint;
+            } else if (wrapper.scrollLeft <= 0) {
+                wrapper.scrollLeft += loopPoint;
+            }
+        });
+
+        // Start autoScroll animation
         autoScroll();
 
-        // Pause carousel scroll on mouse hover & touch
-        track.addEventListener('mouseenter', () => {
-            isPaused = true;
+        // Pause autoscroll on mouse hover (desktop/laptop)
+        wrapper.addEventListener('mouseenter', () => {
+            if (!isMobile) isPaused = true;
         });
-        track.addEventListener('mouseleave', () => {
-            isPaused = false;
+        wrapper.addEventListener('mouseleave', () => {
+            if (!isMobile) isPaused = false;
         });
-        track.addEventListener('touchstart', () => {
+
+        // Touch event handlers (mobile/touchscreens) to pause autoscroll during swiping and resume 1.5s after touch ends
+        wrapper.addEventListener('touchstart', () => {
             isPaused = true;
+            if (resumeTimeout) clearTimeout(resumeTimeout);
         }, { passive: true });
-        track.addEventListener('touchend', () => {
-            isPaused = false;
+
+        wrapper.addEventListener('touchend', () => {
+            resumeTimeout = setTimeout(() => {
+                isPaused = false;
+            }, 1500);
         }, { passive: true });
+
+        // --- CLICK & DRAG TO SCROLL (PC/Laptop mouse drag support) ---
+        let isDown = false;
+        let startX;
+        let scrollLeftVal;
+
+        wrapper.addEventListener('mousedown', (e) => {
+            isDown = true;
+            isPaused = true;
+            wrapper.style.cursor = 'grabbing';
+            startX = e.pageX - wrapper.offsetLeft;
+            scrollLeftVal = wrapper.scrollLeft;
+            if (resumeTimeout) clearTimeout(resumeTimeout);
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            if (isDown) {
+                isDown = false;
+                wrapper.style.cursor = 'grab';
+                isPaused = false;
+            }
+        });
+
+        wrapper.addEventListener('mouseup', () => {
+            if (isDown) {
+                isDown = false;
+                wrapper.style.cursor = 'grab';
+                // Delay resuming autoscroll slightly after dragging ends for premium feel
+                resumeTimeout = setTimeout(() => {
+                    isPaused = false;
+                }, 1000);
+            }
+        });
+
+        wrapper.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - wrapper.offsetLeft;
+            const walk = (x - startX) * 1.5; // Drag sensitivity
+            wrapper.scrollLeft = scrollLeftVal - walk;
+        });
+
+        // Prevent browser default image/video drag ghosting behavior
+        wrapper.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
 
         // --- SCROLL RESPONSIVE NAVBAR ---
         const mainHeader = document.getElementById('main-header');
