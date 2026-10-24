@@ -8,10 +8,9 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Motion stack: GSAP + ScrollTrigger (scroll-driven scenes) & Lenis (smooth scroll) -->
+    <!-- Motion stack: GSAP + ScrollTrigger (scroll-driven scenes) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     
     <!-- Google Product Sans CDN & Google Fonts -->
     <style>
@@ -66,27 +65,27 @@
         }
 
         /* --- FILM GRAIN OVERLAY --- */
+        /* Disabled: the grain image URL no longer loads (HTTP 402), and a fixed full-screen overlay above
+           playing videos costs a full-screen composite every frame. */
         .noise {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10;
-            opacity: 0.035;
-            pointer-events: none;
-            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            display: none;
         }
 
-        /* --- MOUSE TRACKER (DIFF BLEND OVERLAY) --- */
+        /* --- MOUSE TRACKER --- */
+        /* Solid dot instead of mix-blend-mode: difference. Blending a fixed element forces the GPU to
+           re-blend everything beneath it (videos, 3D cards) every frame, which caused black flicker. */
         .mouse-follower {
             position: fixed;
             top: 0;
             left: 0;
             width: 22px;
             height: 22px;
-            background-color: #ffffff;
+            background-color: var(--accent-yellow);
+            border: 2px solid rgba(12, 15, 29, 0.85);
+            box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
             border-radius: 50%;
             pointer-events: none;
             z-index: 999999;
-            mix-blend-mode: difference;
             transform: translate(-50%, -50%);
             transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1), height 0.3s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s, border 0.3s, box-shadow 0.3s;
             will-change: transform;
@@ -273,9 +272,11 @@
             overflow: hidden;
         }
 
+        /* Full-bleed: cancel the section's side padding so cards run all the way to the screen edges */
         .scroll-track-wrapper {
             position: relative;
-            width: 100%;
+            margin-left: -1rem;
+            margin-right: -1rem;
             overflow-x: auto;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE 10+ */
@@ -286,18 +287,32 @@
             display: none; /* Chrome, Safari, Opera */
         }
 
+        @media (min-width: 768px) {
+            .scroll-track-wrapper {
+                margin-left: -3rem;
+                margin-right: -3rem;
+            }
+        }
+
+        /* No will-change here: the track is thousands of pixels wide and would become one giant GPU texture */
         .horizontal-scroll-track {
             display: flex;
             gap: 2.5rem;
             width: max-content;
-            will-change: transform;
             padding: 4rem 0; /* Add vertical space for pop vertical scale shift */
         }
 
-        /* Transform is driven per-frame by JS (curved carousel + hover lift), so it is not transitioned here */
+        /* Transform is driven per-frame by JS (curved carousel + hover lift), so it is not transitioned here.
+           Video cards are opaque, so the glass backdrop blur behind them was invisible but costly. */
         .horizontal-scroll-track > div, .horizontal-scroll-track > a {
             transition: box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s, background-color 0.5s;
-            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        .horizontal-scroll-track > .video-card,
+        .horizontal-scroll-track > .video-card * {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
 
         .horizontal-scroll-track > div:hover, .horizontal-scroll-track > a:hover {
@@ -443,9 +458,8 @@
         /* =========================================================
            MOTION LAYER (preloader, smooth scroll, scroll scenes)
            ========================================================= */
-        html.lenis, html.lenis body { height: auto; }
-        .lenis.lenis-smooth { scroll-behavior: auto !important; }
-        .lenis.lenis-stopped { overflow: hidden; }
+        /* GPU layers are kept to a minimum: too many/too large layers make the GPU drop tiles,
+           which shows up as the dark page background "blinking" through while scrolling. */
 
         /* --- PRELOADER: glowing name + hand-drawn wavy ring --- */
         #preloader {
@@ -569,7 +583,6 @@
             position: absolute;
             inset: 0;
             clip-path: inset(28% 38% 28% 38% round 24px);
-            will-change: clip-path;
             cursor: pointer;
         }
 
@@ -578,7 +591,6 @@
             height: 100%;
             object-fit: cover;
             transform: scale(1.35);
-            will-change: transform;
         }
 
         .zoom-shade {
@@ -609,7 +621,6 @@
             letter-spacing: -0.05em;
             text-transform: uppercase;
             color: #ffffff;
-            will-change: transform;
         }
 
         .zoom-label {
@@ -669,7 +680,6 @@
             text-transform: uppercase;
             color: transparent;
             -webkit-text-stroke: 1.5px rgba(8, 75, 240, 0.14);
-            will-change: transform;
         }
 
         /* --- STAGGERED CARD ENTRANCE (only once JS confirms motion is available) --- */
@@ -703,7 +713,6 @@
 
         .split-char {
             display: inline-block;
-            will-change: transform;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1308,15 +1317,12 @@
         // Mobile detection flag
         const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-        // Video play/pause on hover (and autoplay initially for desktop)
+        // Video play on hover (visibility-based playback is handled by the observer below the cloning logic)
         function bindVideoHover(card) {
             const video = card.querySelector('video');
             if (!video) return;
 
             if (!isMobile) {
-                // Autoplay immediately on load for desktop/laptop
-                video.play().catch(err => console.log("Autoplay blocked or interrupted:", err));
-
                 card.addEventListener('mouseenter', () => {
                     video.play().catch(err => console.log("Video play interrupted:", err));
                 });
@@ -1410,27 +1416,26 @@
             track.appendChild(clone);
         });
 
-        // IntersectionObserver for playing/pausing videos on mobile as they enter/leave the viewport (including clones)
-        if (isMobile) {
-            const mobileVideoObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const video = entry.target.querySelector('video');
-                    if (!video) return;
-                    if (entry.isIntersecting) {
-                        video.play().catch(err => console.log("Mobile video play blocked:", err));
-                    } else {
-                        video.pause();
-                    }
-                });
-            }, {
-                root: null, // Use the viewport
-                threshold: 0.6 // 60% visibility
+        // IntersectionObserver for playing/pausing videos as they enter/leave the viewport (including clones).
+        // Only on-screen cards decode video, on PC and mobile alike, so the page never juggles 14 videos at once.
+        const cardVideoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target.querySelector('video');
+                if (!video) return;
+                if (entry.isIntersecting) {
+                    video.play().catch(err => console.log("Video play blocked:", err));
+                } else {
+                    video.pause();
+                }
             });
+        }, {
+            root: null, // Use the viewport (also clipped by the carousel's horizontal overflow)
+            threshold: isMobile ? 0.6 : 0.15
+        });
 
-            document.querySelectorAll('#work-track .video-card').forEach(card => {
-                mobileVideoObserver.observe(card);
-            });
-        }
+        document.querySelectorAll('#work-track .video-card').forEach(card => {
+            cardVideoObserver.observe(card);
+        });
 
         let scrollSpeed = 0.8; // Butter smooth slide speed
         let isPaused = false;
@@ -1533,16 +1538,18 @@
             document.getElementById('services')
         ];
 
+        // Class changes only happen when the state actually flips: the Tailwind CDN re-scans the whole
+        // page on every class mutation, so touching classes on every scroll event causes heavy lag.
+        let navIsScrolled = null;
+        let activeSectionId = null;
         window.addEventListener('scroll', () => {
             // Morph floating nav pill on scroll
-            if (window.scrollY > 50) {
-                mainHeader.classList.remove('py-6');
-                mainHeader.classList.add('py-3');
-                navPill.classList.add('scrolled-nav');
-            } else {
-                mainHeader.classList.remove('py-3');
-                mainHeader.classList.add('py-6');
-                navPill.classList.remove('scrolled-nav');
+            const scrolled = window.scrollY > 50;
+            if (scrolled !== navIsScrolled) {
+                navIsScrolled = scrolled;
+                mainHeader.classList.toggle('py-3', scrolled);
+                mainHeader.classList.toggle('py-6', !scrolled);
+                navPill.classList.toggle('scrolled-nav', scrolled);
             }
 
             // Section active highlight logic
@@ -1555,15 +1562,14 @@
                 }
             });
 
+            if (currentId === activeSectionId) return;
+            activeSectionId = currentId;
             navLinks.forEach(link => {
-                link.classList.remove('text-yellow-400');
-                link.classList.add('text-white/80');
-                if (link.getAttribute('href') === `#${currentId}`) {
-                    link.classList.add('text-yellow-400');
-                    link.classList.remove('text-white/80');
-                }
+                const isActive = link.getAttribute('href') === `#${currentId}`;
+                link.classList.toggle('text-yellow-400', isActive);
+                link.classList.toggle('text-white/80', !isActive);
             });
-        });
+        }, { passive: true });
 
         // --- CONTACT FORM SUBMIT HANDLER (AJAX) ---
         const contactForm = document.getElementById('contact-form');
@@ -1662,42 +1668,34 @@
                 return chars;
             }
 
-            // --- LENIS SMOOTH SCROLL ---
-            let lenis = null;
-            if (!reduceMotion && window.Lenis) {
-                lenis = new Lenis({ lerp: 0.085, smoothWheel: true });
-                lenis.on('scroll', ScrollTrigger.update);
-                gsap.ticker.add(time => lenis.raf(time * 1000));
-                gsap.ticker.lagSmoothing(0);
-            }
+            // Scrolling stays native (runs on the browser's compositor thread, so it never stutters while
+            // videos decode); the scroll scenes below use scrub smoothing for the buttery feel instead.
 
-            // Anchor links glide instead of jumping
+            // Update text without replacing the text node. Tailwind's CDN re-scans the whole page on every
+            // childList mutation, so per-frame `textContent =` (counters) would trigger 60 full scans a second.
+            const setText = (el, text) => {
+                if (el.firstChild && el.firstChild.nodeType === Node.TEXT_NODE && el.childNodes.length === 1) {
+                    el.firstChild.nodeValue = text;
+                } else {
+                    el.textContent = text;
+                }
+            };
+
+            // Anchor links glide instead of jumping (header offset keeps headings clear of the nav pill)
             document.querySelectorAll('a[href^="#"]').forEach(link => {
                 link.addEventListener('click', (e) => {
                     const id = link.getAttribute('href');
-                    const target = id === '#' ? 0 : document.querySelector(id);
-                    if (target === null) return;
+                    const target = id === '#' ? null : document.querySelector(id);
+                    if (id !== '#' && !target) return;
                     e.preventDefault();
-                    if (lenis) {
-                        lenis.scrollTo(target, { offset: id === '#' ? 0 : -70, duration: 1.6 });
-                    } else if (target === 0) {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else {
-                        target.scrollIntoView({ behavior: 'smooth' });
-                    }
+                    const top = target ? target.getBoundingClientRect().top + window.scrollY - 70 : 0;
+                    window.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
                 });
             });
 
-            // Freeze page scroll while the video modal is open
-            const videoModalEl = document.getElementById('video-modal');
-            new MutationObserver(() => {
-                if (!lenis) return;
-                videoModalEl.classList.contains('pointer-events-none') ? lenis.start() : lenis.stop();
-            }).observe(videoModalEl, { attributes: true, attributeFilter: ['class'] });
-
             // Count-up numbers start from zero
             const counters = document.querySelectorAll('[data-count]');
-            if (!reduceMotion) counters.forEach(el => { el.textContent = '0' + (el.dataset.suffix || ''); });
+            if (!reduceMotion) counters.forEach(el => setText(el, '0' + (el.dataset.suffix || '')));
 
             // --- MAGNETIC BUTTONS ---
             if (!reduceMotion && window.matchMedia('(hover: hover)').matches) {
@@ -1713,7 +1711,7 @@
             // --- PRELOADER: wavy ring draws around the glowing name, then the curtain lifts ---
             function runPreloader(onReveal) {
                 if (!preloader) return onReveal();
-                if (lenis) lenis.stop();
+                document.documentElement.style.overflow = 'hidden'; // no scrolling under the curtain
 
                 const paths = [document.getElementById('pre-path'), document.getElementById('pre-glow')];
                 const dots = [document.getElementById('pre-dot'), document.getElementById('pre-dot-halo')];
@@ -1733,7 +1731,7 @@
                 gsap.timeline({
                     onComplete: () => {
                         preloader.remove();
-                        if (lenis) lenis.start();
+                        document.documentElement.style.overflow = '';
                         window.dispatchEvent(new Event('preloader:done'));
                     }
                 })
@@ -1748,7 +1746,7 @@
                             const offset = len * (1 - progress.p);
                             paths.forEach(p => { p.style.strokeDashoffset = offset; });
                             dots.forEach(dot => { dot.setAttribute('cx', pt[0]); dot.setAttribute('cy', pt[1]); });
-                            num.textContent = Math.round(progress.p * 100);
+                            setText(num, Math.round(progress.p * 100));
                         }
                     }, 0.15)
                     // Rotate the group around the SVG's own centre (200,200) so the ring stays centred on the name
@@ -1793,7 +1791,7 @@
                         trigger: el,
                         start: 'top 95%',
                         once: true,
-                        onEnter: () => gsap.to(o, { v: end, duration: 1.8, ease: 'power3.out', onUpdate: () => { el.textContent = Math.round(o.v) + suffix; } })
+                        onEnter: () => gsap.to(o, { v: end, duration: 1.8, ease: 'power3.out', onUpdate: () => setText(el, Math.round(o.v) + suffix) })
                     });
                 });
 
@@ -1945,6 +1943,7 @@
                 });
 
                 let lastScrollLeft = workWrap.scrollLeft;
+                let lastScrollY = window.scrollY;
                 let lean = 0; // smoothed horizontal speed -> extra card twist
                 let tilt = 0; // smoothed vertical page speed -> card pitch
                 gsap.ticker.add(() => {
@@ -1954,7 +1953,9 @@
                     if (Math.abs(dx) > wrapWidth / 2) dx = 0; // ignore the infinite-loop wrap jump
                     lastScrollLeft = scrollLeft;
                     lean += (gsap.utils.clamp(-14, 14, dx * 0.9) - lean) * 0.08;
-                    tilt += (gsap.utils.clamp(-10, 10, (lenis ? lenis.velocity : 0) * 0.35) - tilt) * 0.1;
+                    const dy = window.scrollY - lastScrollY;
+                    lastScrollY = window.scrollY;
+                    tilt += (gsap.utils.clamp(-10, 10, dy * 0.35) - tilt) * 0.1;
 
                     const half = wrapWidth / 2;
                     for (const card of workCards) {
