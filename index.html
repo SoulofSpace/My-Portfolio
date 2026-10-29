@@ -28,7 +28,8 @@
             
             --font-sans: 'Product Sans', 'Inter', sans-serif;
             --font-serif: 'Instrument Serif', serif;
-            --font-mono: 'Space Mono', monospace;
+            --font-mono: 'Space Mono', monospace; /* only for the playful hero-letter hover morph */
+            --font-label: 'Inter', 'Product Sans', sans-serif; /* small uppercase labels, nav, badges */
         }
 
         body {
@@ -43,7 +44,7 @@
         /* Custom fonts helper */
         .font-product { font-family: var(--font-sans); }
         .font-editorial { font-family: var(--font-serif); }
-        .font-code { font-family: var(--font-mono); }
+        .font-code { font-family: var(--font-label); font-weight: 600; }
 
         /* --- BRIGHT ELECTRIC BLUE HERO BACKGROUND --- */
         .hero-section {
@@ -278,6 +279,8 @@
             margin-left: -1rem;
             margin-right: -1rem;
             overflow-x: auto;
+            /* 3D-curved cards are slightly taller than the box; without this the wheel scrolled them up inside it */
+            overflow-y: hidden;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE 10+ */
             cursor: grab;
@@ -475,50 +478,36 @@
 
         .pre-stage {
             position: relative;
-            width: min(78vw, 420px);
-            aspect-ratio: 1;
+            width: min(82vw, 560px);
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 1.75rem;
         }
 
-        .pre-ring {
+        /* Dharun's signature, written by a pen on a canvas */
+        .pre-sig {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 723 / 535;
+        }
+
+        .pre-sig canvas {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
-            overflow: visible;
-        }
-
-        /* Glow is faked with a wide, faint under-stroke instead of a per-frame drop-shadow filter (much cheaper) */
-        .pre-ring path {
-            fill: none;
-            stroke: rgba(255, 255, 255, 0.9);
-            stroke-width: 1.5;
-            stroke-linecap: round;
-        }
-
-        .pre-ring path.pre-glow {
-            stroke: rgba(255, 255, 255, 0.12);
-            stroke-width: 7;
-        }
-
-        .pre-ring circle {
-            fill: var(--accent-yellow);
-        }
-
-        .pre-ring circle.pre-dot-halo {
-            fill: rgba(255, 210, 0, 0.25);
+            filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.45));
         }
 
         .pre-name {
             font-family: var(--font-sans);
             font-weight: 900;
-            font-size: clamp(1.8rem, 6vw, 3.2rem);
-            letter-spacing: 0.28em;
-            padding-left: 0.28em; /* optically re-center tracked text */
+            font-size: clamp(1.1rem, 3.2vw, 1.6rem);
+            letter-spacing: 0.5em;
+            padding-left: 0.5em; /* optically re-center tracked text */
             color: #ffffff;
-            text-shadow: 0 0 12px rgba(255, 255, 255, 0.75), 0 0 34px rgba(255, 255, 255, 0.35);
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.25);
         }
 
         .pre-name span {
@@ -534,7 +523,8 @@
             display: flex;
             justify-content: space-between;
             padding: 0 2.5rem;
-            font-family: var(--font-mono);
+            font-family: var(--font-label);
+            font-weight: 600;
             font-size: 10px;
             letter-spacing: 0.25em;
             text-transform: uppercase;
@@ -632,7 +622,8 @@
             justify-content: space-between;
             padding: 0 3rem;
             z-index: 3;
-            font-family: var(--font-mono);
+            font-family: var(--font-label);
+            font-weight: 600;
             font-size: 10px;
             letter-spacing: 0.25em;
             text-transform: uppercase;
@@ -730,14 +721,11 @@
     <!-- Preloader -->
     <div id="preloader" aria-hidden="true">
         <div class="pre-stage">
-            <svg class="pre-ring" viewBox="0 0 400 400">
-                <g id="pre-ring-g">
-                    <path id="pre-glow" class="pre-glow" d=""></path>
-                    <path id="pre-path" d=""></path>
-                    <circle id="pre-dot-halo" class="pre-dot-halo" r="10" cx="200" cy="35"></circle>
-                    <circle id="pre-dot" r="4" cx="200" cy="35"></circle>
-                </g>
-            </svg>
+            <!-- Signature: Dharun's real signature, written stroke by stroke like a pen. signature-strokes.js holds each
+                 stroke's centre-line, ink thickness and writing pace (traced from the signature image). -->
+            <div class="pre-sig">
+                <canvas class="sig-ink" width="723" height="535"></canvas>
+            </div>
             <div class="pre-name">DHARUN<span>.</span></div>
         </div>
         <div class="pre-meta">
@@ -746,8 +734,15 @@
         </div>
     </div>
     <script>
-        // Safety net: never leave the preloader up if a script fails to load
-        window.addEventListener('load', () => setTimeout(() => { const p = document.getElementById('preloader'); if (p) p.remove(); }, 4500));
+        // Safety net: never leave the preloader up (or the page scroll-locked) if a script fails to load.
+        // Must comfortably outlast the signature animation (~5.5s).
+        window.addEventListener('load', () => setTimeout(() => {
+            const p = document.getElementById('preloader');
+            if (!p) return;
+            p.remove();
+            document.documentElement.style.overflow = '';
+            window.dispatchEvent(new Event('preloader:done'));
+        }, 10000));
     </script>
 
     <!-- Fixed Header -->
@@ -1155,17 +1150,17 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-2 font-code" for="name">Your Name</label>
-                        <input type="text" id="name" name="name" placeholder="John Doe" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required>
+                        <input type="text" id="name" name="name" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-2 font-code" for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="john@example.com" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required>
+                        <input type="email" id="email" name="email" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-2 font-code" for="message">Project Description</label>
-                    <textarea id="message" name="message" rows="4" placeholder="Tell me about your brand, assets, and project goals..." class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required></textarea>
+                    <textarea id="message" name="message" rows="4" class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-yellow-400 focus:bg-white/[0.08] transition-all font-product text-white placeholder-white/40 interactive-target" required></textarea>
                 </div>
 
                 <!-- Golden Yellow CTA submit button -->
@@ -1430,6 +1425,8 @@
             });
         }, {
             root: null, // Use the viewport (also clipped by the carousel's horizontal overflow)
+            // On PC, start decoding ~300px before the section arrives so playback is already running (no hitch)
+            rootMargin: isMobile ? '0px' : '300px 0px',
             threshold: isMobile ? 0.6 : 0.15
         });
 
@@ -1437,14 +1434,25 @@
             cardVideoObserver.observe(card);
         });
 
-        let scrollSpeed = 0.8; // Butter smooth slide speed
+        let scrollSpeed = 48; // Butter smooth slide speed, in px per second (same pace on 60Hz and 144Hz screens)
         let isPaused = false;
         let resumeTimeout = null;
 
-        // AutoScroll function using wrapper.scrollLeft
-        function autoScroll() {
-            if (!isPaused) {
-                wrapper.scrollLeft += scrollSpeed;
+        // Only slide while the carousel is on screen
+        let carouselOnScreen = false;
+        new IntersectionObserver(([entry]) => { carouselOnScreen = entry.isIntersecting; }).observe(wrapper);
+
+        // AutoScroll function using wrapper.scrollLeft. Position is kept as a float because the browser rounds
+        // scrollLeft to whole device pixels, which made per-frame += 0.8 steps stutter.
+        let autoPos = wrapper.scrollLeft;
+        let lastFrameTime = performance.now();
+        function autoScroll(now) {
+            const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
+            lastFrameTime = now;
+            if (!isPaused && carouselOnScreen) {
+                if (Math.abs(wrapper.scrollLeft - autoPos) > 2) autoPos = wrapper.scrollLeft; // drag / loop wrap moved it
+                autoPos += scrollSpeed * dt;
+                wrapper.scrollLeft = autoPos;
             }
             requestAnimationFrame(autoScroll);
         }
@@ -1460,7 +1468,7 @@
         });
 
         // Start autoScroll animation
-        autoScroll();
+        requestAnimationFrame(autoScroll);
 
         // Pause autoscroll on mouse hover (desktop/laptop)
         wrapper.addEventListener('mouseenter', () => {
@@ -1633,6 +1641,8 @@
         }
     </script>
 
+    <script src="signature-strokes.js"></script>
+
     <!-- Motion Layer: preloader, smooth scroll, hero intro & scroll-driven scenes -->
     <script>
         (() => {
@@ -1708,26 +1718,73 @@
                 });
             }
 
-            // --- PRELOADER: wavy ring draws around the glowing name, then the curtain lifts ---
+            // --- PRELOADER: the signature is written by a pen, then the curtain lifts ---
+
+            // Paints the signature like a pen: each stroke is a round nib of varying width (a disc every 1px along the
+            // stroke) laid down up to the current writing time. Finished strokes are kept on a second canvas, so
+            // each frame only redraws the stroke being written.
+            function signaturePen(canvas, data) {
+                const VIEW_W = 723, VIEW_H = 535; // the signature's own units
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                canvas.width = Math.round((canvas.getBoundingClientRect().width || VIEW_W) * dpr);
+                canvas.height = Math.round(canvas.width * VIEW_H / VIEW_W);
+                const scale = canvas.width / VIEW_W;
+                const done = document.createElement('canvas');
+                done.width = canvas.width;
+                done.height = canvas.height;
+                const ctx = canvas.getContext('2d'), doneCtx = done.getContext('2d');
+
+                // [x, y, nib radius, writing time] every 3px along each stroke
+                const strokes = data.map(flat => {
+                    const n = flat.length / 4, s = { x: [], y: [], r: [], t: [] };
+                    for (let i = 0; i < n; i++) {
+                        s.x.push(flat[i * 4]); s.y.push(flat[i * 4 + 1]); s.r.push(flat[i * 4 + 2]); s.t.push(flat[i * 4 + 3]);
+                    }
+                    s.end = s.t[n - 1];
+                    return s;
+                });
+
+                const nib = (c, s, until) => {
+                    c.setTransform(scale, 0, 0, scale, scale / 2, scale / 2); // traced coords are pixel centres
+                    c.fillStyle = '#ffffff';
+                    c.beginPath();
+                    for (let i = 0; i < s.t.length - 1 && s.t[i] < until; i++) {
+                        const part = Math.min(1, (until - s.t[i]) / (s.t[i + 1] - s.t[i]));
+                        const dx = s.x[i + 1] - s.x[i], dy = s.y[i + 1] - s.y[i], dr = s.r[i + 1] - s.r[i];
+                        const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) * part));
+                        for (let j = 0; j <= steps; j++) {
+                            const u = part * j / steps;
+                            const x = s.x[i] + dx * u, y = s.y[i] + dy * u, r = s.r[i] + dr * u;
+                            c.moveTo(x + r, y);
+                            c.arc(x, y, r, 0, Math.PI * 2);
+                        }
+                    }
+                    c.fill();
+                    c.setTransform(1, 0, 0, 1, 0, 0);
+                };
+
+                let finished = 0;
+                return until => {
+                    while (finished < strokes.length && until >= strokes[finished].end) nib(doneCtx, strokes[finished++], Infinity);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(done, 0, 0);
+                    if (finished < strokes.length) nib(ctx, strokes[finished], until);
+                };
+            }
+
             function runPreloader(onReveal) {
                 if (!preloader) return onReveal();
                 document.documentElement.style.overflow = 'hidden'; // no scrolling under the curtain
 
-                const paths = [document.getElementById('pre-path'), document.getElementById('pre-glow')];
-                const dots = [document.getElementById('pre-dot'), document.getElementById('pre-dot-halo')];
                 const num = document.getElementById('pre-num');
-                const pts = [];
-                for (let i = 0; i <= 360; i += 2) {
-                    const a = (i * Math.PI) / 180;
-                    const r = 165 + 9 * Math.sin(a * 7) + 5 * Math.sin(a * 3 + 1);
-                    pts.push([200 + r * Math.cos(a - Math.PI / 2), 200 + r * Math.sin(a - Math.PI / 2)]);
-                }
-                const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
-                paths.forEach(p => p.setAttribute('d', d));
-                const len = paths[0].getTotalLength();
-                paths.forEach(p => { p.style.strokeDasharray = len; p.style.strokeDashoffset = len; });
+                const canvas = preloader.querySelector('.sig-ink');
+                let paint = null;
+                try { if (window.SIGNATURE_STROKES && canvas) paint = signaturePen(canvas, window.SIGNATURE_STROKES); } catch (err) { /* below */ }
+                if (!paint) preloader.querySelector('.pre-sig').style.visibility = 'hidden'; // name and curtain still play
 
-                const progress = { p: 0 };
+                // Writing time runs 0-1000; the pen's natural pace (quick on straights, slower round curves) is baked
+                // into it, and the single tween driving it eases in at the start and out at the end.
+                const pen = { t: 0 };
                 gsap.timeline({
                     onComplete: () => {
                         preloader.remove();
@@ -1735,24 +1792,15 @@
                         window.dispatchEvent(new Event('preloader:done'));
                     }
                 })
-                    .from('.pre-name', { opacity: 0, scale: 0.92, duration: 1.1, ease: 'power3.out' }, 0)
-                    .to(progress, {
-                        p: 1,
-                        duration: 1.7,
-                        ease: 'power2.inOut',
-                        onUpdate: () => {
-                            // Points were precomputed, so the tracer dot needs no per-frame path measuring
-                            const pt = pts[Math.round(progress.p * (pts.length - 1))];
-                            const offset = len * (1 - progress.p);
-                            paths.forEach(p => { p.style.strokeDashoffset = offset; });
-                            dots.forEach(dot => { dot.setAttribute('cx', pt[0]); dot.setAttribute('cy', pt[1]); });
-                            setText(num, Math.round(progress.p * 100));
+                    .to(pen, {
+                        t: 1000, duration: 3.4, ease: 'power1.inOut', onUpdate: () => {
+                            if (paint) paint(pen.t);
+                            setText(num, Math.round(pen.t / 10));
                         }
                     }, 0.15)
-                    // Rotate the group around the SVG's own centre (200,200) so the ring stays centred on the name
-                    .to('#pre-ring-g', { rotation: 40, svgOrigin: '200 200', duration: 2.3, ease: 'power1.inOut' }, 0)
-                    .to('.pre-stage', { scale: 0.88, opacity: 0, duration: 0.6, ease: 'power3.in' }, '+=0.15')
-                    .to(preloader, { clipPath: 'inset(0% 0% 100% 0%)', duration: 1.05, ease: 'power4.inOut' }, '-=0.25')
+                    .from('.pre-name', { opacity: 0, y: 14, duration: 0.9, ease: 'power3.out' }, 2.5)
+                    .to('.pre-stage', { scale: 0.94, opacity: 0, duration: 0.7, ease: 'power3.inOut' }, '+=0.3')
+                    .to(preloader, { clipPath: 'inset(0% 0% 100% 0%)', duration: 1.05, ease: 'power4.inOut' }, '-=0.3')
                     .add(onReveal, '-=0.75');
             }
 
@@ -1930,41 +1978,21 @@
                 window.addEventListener('resize', measureCards);
                 ScrollTrigger.addEventListener('refresh', measureCards);
 
-                // The whole wall tilts back as it scrolls into view and tips forward as it leaves
-                gsap.set(workWrap, { transformPerspective: 1400, transformOrigin: '50% 50%' });
-                gsap.fromTo(workWrap, { rotateX: 28, scale: 0.86, y: 60 }, {
-                    rotateX: 0, scale: 1, y: 0, ease: 'none',
-                    scrollTrigger: { trigger: '#work-container', start: 'top bottom', end: 'top 15%', scrub: 1 }
-                });
-                gsap.to(workWrap, {
-                    rotateX: -16, scale: 0.92, ease: 'none',
-                    // Starts once the carousel itself (~420px into the section) has risen past 30% of the viewport
-                    scrollTrigger: { trigger: '#work-container', start: 'top+=420 30%', end: 'bottom top', scrub: 1 }
-                });
-
-                let lastScrollLeft = workWrap.scrollLeft;
-                let lastScrollY = window.scrollY;
-                let lean = 0; // smoothed horizontal speed -> extra card twist
-                let tilt = 0; // smoothed vertical page speed -> card pitch
+                // Cards hold their cylinder shape steadily: no extra tilt from page scrolling or drag speed,
+                // so videos never warp or slide while you scroll past the section.
                 gsap.ticker.add(() => {
                     if (!carouselVisible) return;
                     const scrollLeft = workWrap.scrollLeft;
-                    let dx = scrollLeft - lastScrollLeft;
-                    if (Math.abs(dx) > wrapWidth / 2) dx = 0; // ignore the infinite-loop wrap jump
-                    lastScrollLeft = scrollLeft;
-                    lean += (gsap.utils.clamp(-14, 14, dx * 0.9) - lean) * 0.08;
-                    const dy = window.scrollY - lastScrollY;
-                    lastScrollY = window.scrollY;
-                    tilt += (gsap.utils.clamp(-10, 10, dy * 0.35) - tilt) * 0.1;
-
                     const half = wrapWidth / 2;
                     for (const card of workCards) {
                         const d = gsap.utils.clamp(-1.8, 1.8, (card._center - scrollLeft - half) / half);
-                        card._hover = (card._hover || 0) + ((card._hoverTarget || 0) - (card._hover || 0)) * 0.14;
-                        const h = card._hover;
-                        const rotY = -d * 34 - lean;
+                        const target = card._hoverTarget || 0;
+                        const prevHover = card._hover || 0;
+                        if (Math.abs(target - prevHover) > 0.001) card._hover = prevHover + (target - prevHover) * 0.14;
+                        const h = card._hover || 0;
+                        const rotY = -d * 34;
                         const z = d * d * 140 - 20 + h * 70;
-                        card.style.transform = `perspective(1100px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${(tilt * (1 - h)).toFixed(2)}deg) translateY(${(-h * 12).toFixed(1)}px)`;
+                        card.style.transform = `perspective(1100px) translateZ(${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) translateY(${(-h * 12).toFixed(1)}px)`;
                     }
                 });
 
