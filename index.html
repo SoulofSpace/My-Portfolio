@@ -552,10 +552,11 @@
         .intro-lock .kinetic-char { transition: none !important; }
 
         /* --- ABOUT ME: scroll-driven zoom card --- */
+        /* White grid paper, like the sections that follow it */
         #about-zoom {
             position: relative;
             height: 260vh;
-            background-color: var(--bg-color);
+            background-color: #ffffff;
         }
 
         .zoom-sticky {
@@ -564,8 +565,8 @@
             height: 100vh;
             overflow: hidden;
             background-image:
-                linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+                linear-gradient(to right, rgba(8, 75, 240, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(8, 75, 240, 0.05) 1px, transparent 1px);
             background-size: 40px 40px;
         }
 
@@ -600,7 +601,6 @@
             gap: 2.5vw;
             z-index: 2;
             pointer-events: none;
-            mix-blend-mode: difference;
         }
 
         .zoom-word {
@@ -610,7 +610,7 @@
             line-height: 0.8;
             letter-spacing: -0.05em;
             text-transform: uppercase;
-            color: #ffffff;
+            color: var(--accent-yellow);
         }
 
         .zoom-label {
@@ -627,7 +627,7 @@
             font-size: 10px;
             letter-spacing: 0.25em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(0, 34, 122, 0.55);
         }
 
         .zoom-copy {
@@ -823,7 +823,8 @@
             </div>
 
             <div class="zoom-media interactive-target">
-                <video src="Dhurandhar Final(Hope So)(2).mp4" muted loop playsinline preload="metadata"></video>
+                <!-- #t=2: the reel starts 2s in (00:02:00); the script loops it back there too -->
+                <video src="Dhurandhar Final(Hope So)(2).mp4#t=2" muted playsinline preload="metadata"></video>
                 <div class="zoom-shade"></div>
             </div>
 
@@ -1859,7 +1860,12 @@
                 const zoomMedia = document.querySelector('.zoom-media');
                 const zoomVideo = zoomMedia.querySelector('video');
                 const zoomCopy = document.querySelector('.zoom-copy');
-                const openZoomReel = () => openVideoModal(zoomVideo.getAttribute('src'));
+                const openZoomReel = () => openVideoModal(zoomVideo.getAttribute('src').split('#')[0]); // full edit from 0:00
+                // Background reel loops from 2s in (its src starts it there), never from the very beginning
+                zoomVideo.addEventListener('ended', () => {
+                    zoomVideo.currentTime = 2;
+                    zoomVideo.play().catch(() => {});
+                });
                 zoomMedia.addEventListener('click', openZoomReel);
                 document.getElementById('zoom-play').addEventListener('click', openZoomReel);
                 ScrollTrigger.create({
